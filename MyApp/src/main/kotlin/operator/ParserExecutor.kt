@@ -1,6 +1,8 @@
 package operator
 
+import DimensRatio
 import `interface`.Executor
+import javafx.application.Platform
 import model.DimenDataModel
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -8,12 +10,11 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import java.util.concurrent.Executors
 import javax.xml.parsers.DocumentBuilderFactory
-import kotlin.math.exp
 
-class ParserExecutor(file: File) : Executor {
+class ParserExecutor(file: File) : Executor, MyOperator() {
 
-    private val ratio: Float = 320f / 360f
     private val PATTERN_DP: String = "dp"
     private val PATTERN_PX: String = "px"
 
@@ -39,42 +40,44 @@ class ParserExecutor(file: File) : Executor {
     }
 
     override fun start() {
-        val doc = parserXML(inputStream)
-        doc?.let {
-            //println(doc.documentElement.nodeName)
-            //  val exportPathArray = ArrayList<String>()
-            //     DimensRatio.values().mapTo(exportPathArray) { it.pathName() }
 
-            val export = ExportDimenXML(parentPath, arrayOf(DimensRatio.HDPI.pathName(), DimensRatio.LDPI.pathName(), DimensRatio.MDPI.pathName()))
-            val rootElement = export.createRootElement(doc.documentElement.nodeName)
+        val service = Executors.newSingleThreadExecutor()
+        service.execute({
+            val doc = parserXML(inputStream)
+            doc?.let {
+                val export = ExportDimenXML(parentPath, arrayOf(DimensRatio.HDPI.pathName(), DimensRatio.LDPI.pathName(), DimensRatio.MDPI.pathName()))
+                val rootElement = export.createRootElement(doc.documentElement.nodeName)
 
-            val nodeList = doc.getElementsByTagName("dimen")
-            (0..nodeList.length)
-                    .map { nodeList.item(it) }
-                    .forEach {
-                        it?.let {
-                            val element = it as Element
-                            val elementAttr = element.getAttribute("name")
-                            parseArray.add(DimenDataModel(elementAttr, it.firstChild.textContent))
+                val nodeList = doc.getElementsByTagName("dimen")
+                (0..nodeList.length)
+                        .map { nodeList.item(it) }
+                        .forEach {
+                            it?.let {
+                                val element = it as Element
+                                val elementAttr = element.getAttribute("name")
+                                parseArray.add(DimenDataModel(elementAttr, it.firstChild.textContent))
+                            }
                         }
-                    }
-            for (model in parseArray) {
-                val nodeValueToConvert = calculatorToString(model.value, DimensRatio.HDPI.getRatio())
-                export.createChildNode(rootElement, "dimen", "name", model.name, nodeValueToConvert)
+                for (model in parseArray) {
+                    val nodeValueToConvert = calculatorToString(model.value, DimensRatio.HDPI.getRatio())
+                    export.createChildNode(rootElement, "dimen", "name", model.name, nodeValueToConvert)
+                }
+                export.exportXMLFile()
+                finish()
             }
-            export.exportXMLFile()
-            finish()
-            return
-        }
-        println("Error parser")
+            println("Error parser")
+        })
+        service.shutdown()
     }
 
     override fun finish() {
         inputStream.close()
-        callback?.let {
-            callback!!.onCreateFinish()
+        Platform.runLater {
+            callback?.let {
+                callback!!.onCreateFinish()
+            }
+            println("Finish")
         }
-        println("finish")
     }
 
     private fun parserXML(inputStream: InputStream): Document? {

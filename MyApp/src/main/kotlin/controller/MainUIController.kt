@@ -1,7 +1,6 @@
 package controller
 
 import UsefulUtils
-import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.Parent
@@ -13,7 +12,6 @@ import operator.ParserExecutor
 import java.io.File
 import java.net.URL
 import java.util.*
-import java.util.concurrent.Executors
 import kotlin.system.exitProcess
 
 class MainUIController : Initializable, ParserExecutor.Callback {
@@ -42,7 +40,6 @@ class MainUIController : Initializable, ParserExecutor.Callback {
             exitProcess(100)
         }
         executeButton.setOnAction {
-            // executeGenerator(resourcePath)
             when {
                 file != null -> {
                     file?.let {
@@ -75,45 +72,18 @@ class MainUIController : Initializable, ParserExecutor.Callback {
         fileChooser.extensionFilters.addAll(arrayOf(FileChooser.ExtensionFilter("xml", "*.xml")))
     }
 
-/*    private fun executeGenerator(path: String?) {
-        path?.let {
-            Platform.runLater({
-                mainLabel.text = "Waiting..."
-                executeButton.isDisable = true
-            })
-
-            val service = Executors.newSingleThreadExecutor()
-            service.execute({
-                // XmlConverter(path = path, callback = this).start()
-            })
-            service.shutdown()
-        }
-    }*/
-
     private fun executeGenerator(f: File) {
         mainLabel.text = "Waiting..."
         executeButton.isDisable = true
-        val service = Executors.newSingleThreadExecutor()
-        service.execute({
-            val parserExecutor = ParserExecutor(f)
-            parserExecutor.setCallback(this)
-            parserExecutor.start()
-        })
-        service.shutdown()
+        val parserExecutor = ParserExecutor(f)
+        parserExecutor.setCallback(this)
+        parserExecutor.start()
     }
 
     override fun onCreateFinish() {
-        Platform.runLater({
-            file = null
-            mainLabel.text = "Finish !!"
-            executeButton.isDisable = false
-        })
+        file = null
+        mainLabel.text = "Finish !!"
+        executeButton.isDisable = false
     }
 
-/*    override fun onConvertFinish(status: String) {
-        Platform.runLater({
-            mainLabel.text = status
-            executeButton.isDisable = false
-        })
-    }*/
 }
