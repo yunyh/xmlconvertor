@@ -11,7 +11,6 @@ class AppMain : Application() {
             primaryStage != null -> with(primaryStage) {
                 val root: Parent? = FXMLLoader.load(ResourceURL.MAIN_UI)
                 val scene = Scene(root)
-
                 this.scene = scene
                 title = "Xml Converter"
                 show()

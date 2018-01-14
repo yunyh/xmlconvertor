@@ -1,3 +1,4 @@
+/*
 package operator
 
 import ResourceURL
@@ -50,4 +51,4 @@ class XmlConverter(path: String, callback: Callback) : Executor {
     interface Callback {
         fun onConvertFinish(status: String)
     }
-}
+}*/

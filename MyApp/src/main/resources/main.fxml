@@ -7,40 +7,21 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="mainParent" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainUIController">
-    <children>
-        <Label fx:id="mainLabel" alignment="TOP_LEFT" layoutX="14.0" layoutY="25.0" minHeight="-Infinity"
-               minWidth="-Infinity" prefHeight="18.0" prefWidth="600.0" text="Hello World" textAlignment="CENTER"
-               AnchorPane.bottomAnchor="357.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-               AnchorPane.topAnchor="25.0"/>
-
-        <MenuBar prefHeight="25.0" prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                 AnchorPane.topAnchor="0.0">
-            <menus>
-                <Menu id="file" mnemonicParsing="false" text="File">
-                    <items>
-                        <MenuItem fx:id="menuItemOpen" mnemonicParsing="false" text="Open"/>
-                    </items>
-                    <items>
-                        <MenuItem fx:id="menuItemClose" mnemonicParsing="false" text="Close"/>
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Delete"/>
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Help">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="About"/>
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
-
-        <Button layoutY="43.0" mnemonicParsing="false" prefHeight="22.0" prefWidth="66.0" text="Execute"
-                fx:id="executeButton"
-                AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="43.0"/>
-    </children>
+<AnchorPane fx:id="mainParent" minHeight="320.0" minWidth="480.0" prefHeight="182.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainUIController">
+    <MenuBar prefHeight="25.0" prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Menu id="file" mnemonicParsing="false" text="File">
+            <MenuItem fx:id="menuItemOpen" mnemonicParsing="false" text="Open" />
+            <MenuItem fx:id="menuItemClose" mnemonicParsing="false" text="Close" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="Edit">
+            <!--<MenuItem mnemonicParsing="false" text="Delete"/>-->
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+            <MenuItem mnemonicParsing="false" text="About" />
+        </Menu>
+    </MenuBar>
+    <AnchorPane layoutX="93.0" layoutY="26.0" prefHeight="75.0" prefWidth="600.0" AnchorPane.bottomAnchor="299.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="26.0">
+        <Label fx:id="mainLabel" alignment="TOP_LEFT" layoutX="13.0" layoutY="12.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="542.0" text="Hello World" textAlignment="CENTER" AnchorPane.leftAnchor="13.0" AnchorPane.rightAnchor="45.0" AnchorPane.topAnchor="12.0" />
+        <Button fx:id="executeButton" layoutX="14.0" layoutY="37.0" mnemonicParsing="false" prefHeight="22.0" prefWidth="66.0" text="Execute" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="37.0" />
+    </AnchorPane>
 </AnchorPane>

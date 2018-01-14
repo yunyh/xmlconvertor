@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     compile(kotlinModule("stdlib-jdk8", kotlin_version))
-    compile("org.python", "jython-standalone", "2.7.1")
+//    compile("org.python", "jython-standalone", "2.7.1")
 }
 
 tasks.withType<KotlinCompile> {
