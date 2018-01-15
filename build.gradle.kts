@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.js.translate.context.Namer.kotlin
 
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 buildscript {
     var kotlin_version: String by extra
@@ -89,7 +89,7 @@ tasks {
 */
 
 val fatJar = task("fatJar", type = Jar::class) {
-    baseName = "${project.name}-fat"
+    baseName = "XmlConverter"
     manifest {
         attributes["Implementation-Title"] = "My App"
         attributes["Implementation-Version"] = version
@@ -100,7 +100,7 @@ val fatJar = task("fatJar", type = Jar::class) {
 }
 
 tasks {
-    "build" {
+    "jar" {
         dependsOn(fatJar)
     }
 }

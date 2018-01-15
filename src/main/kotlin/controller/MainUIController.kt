@@ -7,6 +7,7 @@ import javafx.scene.Parent
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
+import javafx.scene.input.TransferMode
 import javafx.stage.FileChooser
 import operator.ParserExecutor
 import java.io.File
@@ -48,17 +49,40 @@ class MainUIController : Initializable, ParserExecutor.Callback {
                 }
             }
         }
+        with(mainParent) {
+            setOnDragOver {
+                val board = it.dragboard
+
+                when (board.hasFiles()) {
+                    true -> it.acceptTransferModes(TransferMode.COPY)
+                    false -> it.consume()
+                }
+            }
+            setOnDragDropped {
+                when (it.dragboard.hasFiles()) {
+                    true -> {
+                        setDestinationFile(it.dragboard.files[0])
+                        it.isDropCompleted = true
+                    }
+                }
+                it.consume()
+            }
+        }
+    }
+
+    private fun setDestinationFile(file: File) {
+        this.file = file
+        lastPath = file.parentFile.path
+        val resourcePath = UsefulUtils.normalizeFilePath(file.path)
+        mainLabel.text = resourcePath
     }
 
     private fun fileExplorer() {
         kotlin.run {
             configureFileChooser(fileChooser)
-            file = fileChooser.showOpenDialog(mainParent.scene.window)
+            val file = fileChooser.showOpenDialog(mainParent.scene.window)
             file?.let {
-                lastPath = file!!.parentFile.path
-                val resourcePath = UsefulUtils.normalizeFilePath(file!!.path)
-                mainLabel.text = resourcePath
-                // openFile(file = file)
+                setDestinationFile(file)
             }
         }
     }

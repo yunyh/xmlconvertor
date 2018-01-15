@@ -4,13 +4,15 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
-class ExportDimenXML(private val parentPath: String, private val exportPath: Array<String>) {
+class ExportDimenXML(private val parentPath: String, private val exportPath: String) {
     private val docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
     private val document: Document
+    private val transformer = TransformerFactory.newInstance().newTransformer()
 
     init {
         document = docBuilder.newDocument()
@@ -32,14 +34,13 @@ class ExportDimenXML(private val parentPath: String, private val exportPath: Arr
     }
 
     fun exportXMLFile() {
-        val transformerFactory = TransformerFactory.newInstance()
-        val transformer = transformerFactory.newTransformer()
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes")
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4")
         val source = DOMSource(document)
-        (0 until exportPath.size).map { exportPath[it] }.forEach {
-            val destinationPath = "$parentPath/$it"
-            File(destinationPath).mkdir()
-            val streamResult = StreamResult("$destinationPath/dimens.xml")
-            transformer.transform(source, streamResult)
-        }
+        val destinationPath = "$parentPath/$exportPath"
+        File(destinationPath).mkdir()
+        val streamResult = StreamResult("$destinationPath/dimens.xml")
+        transformer.transform(source, streamResult)
     }
 }

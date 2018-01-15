@@ -45,9 +45,6 @@ class ParserExecutor(file: File) : Executor, MyOperator() {
         service.execute({
             val doc = parserXML(inputStream)
             doc?.let {
-                val export = ExportDimenXML(parentPath, arrayOf(DimensRatio.HDPI.pathName(), DimensRatio.LDPI.pathName(), DimensRatio.MDPI.pathName()))
-                val rootElement = export.createRootElement(doc.documentElement.nodeName)
-
                 val nodeList = doc.getElementsByTagName("dimen")
                 (0..nodeList.length)
                         .map { nodeList.item(it) }
@@ -55,15 +52,12 @@ class ParserExecutor(file: File) : Executor, MyOperator() {
                             it?.let {
                                 val element = it as Element
                                 val elementAttr = element.getAttribute("name")
+                                println("$elementAttr : ${it.firstChild.textContent}")
                                 parseArray.add(DimenDataModel(elementAttr, it.firstChild.textContent))
                             }
                         }
-                for (model in parseArray) {
-                    val nodeValueToConvert = calculatorToString(model.value, DimensRatio.HDPI.getRatio())
-                    export.createChildNode(rootElement, "dimen", "name", model.name, nodeValueToConvert)
-                }
-                export.exportXMLFile()
-                finish()
+                buildXMLFile(doc.documentElement.nodeName)
+                return@execute
             }
             println("Error parser")
         })
@@ -80,6 +74,19 @@ class ParserExecutor(file: File) : Executor, MyOperator() {
         }
     }
 
+    private fun buildXMLFile(docNodeName: String) {
+        for (ratio in DimensRatio.values()) {
+            val export = ExportDimenXML(parentPath, ratio.pathName())
+            val rootElement = export.createRootElement(docNodeName)
+            for (model in parseArray) {
+                val nodeValueToConvert = calculatorToString(model.value, ratio.getRatio())
+                export.createChildNode(rootElement, "dimen", "name", model.name, nodeValueToConvert)
+            }
+            export.exportXMLFile()
+        }
+        finish()
+    }
+
     private fun parserXML(inputStream: InputStream): Document? {
         try {
             val instance = DocumentBuilderFactory.newInstance()
@@ -93,10 +100,11 @@ class ParserExecutor(file: File) : Executor, MyOperator() {
 
     private fun calculatorToString(objectString: String, ratio: Float): String {
         if (objectString.contains(PATTERN_PX)) {
+            println("$objectString : contains px")
             return objectString
         }
         val value = objectString.replace(PATTERN_DP, "").toFloat() * ratio
-        return (Math.round(value * 100) / 100f).toString() + PATTERN_DP
+        return (Math.round(value * 100.0) / 100.0).toString() + PATTERN_DP
     }
 
     @FunctionalInterface
