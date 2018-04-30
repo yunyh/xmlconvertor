@@ -10,8 +10,8 @@ import org.jetbrains.kotlin.js.translate.context.Namer.kotlin
 version = "1.0"
 
 buildscript {
-    var kotlin_version: String by extra
-    kotlin_version = "1.2.10"
+    var kotlinVersion: String by extra
+    kotlinVersion = "1.2.41"
 
     repositories {
         mavenCentral()
@@ -19,7 +19,7 @@ buildscript {
     }
 
     dependencies {
-        classpath(kotlinModule("gradle-plugin", kotlin_version))
+        classpath(kotlinModule("gradle-plugin", kotlinVersion))
     }
 }
 
@@ -28,15 +28,14 @@ apply {
     plugin("maven")
 }
 
-val kotlin_version: String by extra
+val kotlinVersion: String by extra
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile(kotlinModule("stdlib-jdk8", kotlin_version))
-//    compile("org.python", "jython-standalone", "2.7.1")
+    compile(kotlinModule("stdlib-jdk8", kotlinVersion))
 }
 
 tasks.withType<KotlinCompile> {
