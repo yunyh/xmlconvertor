@@ -19,28 +19,28 @@ class ExportDimenXML(private val parentPath: String, private val exportPath: Str
     }
 
     fun createRootElement(tagName: String): Element {
-        val rootElement = document.createElement(tagName)
-        document.appendChild(rootElement)
-        return rootElement
+        return document.createElement(tagName).apply {
+            document.appendChild(this)
+        }
     }
 
     fun createChildNode(rootElement: Element, elementName: String, attrName: String, attrValue: String, nodeValue: String) {
-        val dimenElement = document.createElement(elementName)
-        val attr = document.createAttribute(attrName)
-        attr.value = attrValue
-        dimenElement.setAttributeNode(attr)
-        dimenElement.appendChild(document.createTextNode(nodeValue))
-        rootElement.appendChild(dimenElement)
+        document.createElement(elementName).run {
+            setAttributeNode(document.createAttribute(attrName).apply { value = attrValue })
+            appendChild(document.createTextNode(nodeValue))
+            rootElement.appendChild(this)
+        }
     }
 
     fun exportXMLFile() {
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes")
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4")
-        val source = DOMSource(document)
-        val destinationPath = "$parentPath/$exportPath"
-        File(destinationPath).mkdir()
-        val streamResult = StreamResult("$destinationPath/dimens.xml")
-        transformer.transform(source, streamResult)
+        with(transformer) {
+            setOutputProperty(Properties.XmlPropertyKeys.INDENT, Properties.XmlPropertyValue.YES)
+            setOutputProperty(Properties.XmlPropertyKeys.OMIT_XML_DECLARATION, Properties.XmlPropertyValue.YES)
+            setOutputProperty(Properties.XmlPropertyKeys.INDENT_AMOUNT, Properties.XmlPropertyValue.INDENT_VAULE)
+            transform(DOMSource(document), with("$parentPath/$exportPath") {
+                File(this).mkdir()
+                StreamResult("$this/dimens.xml")
+            })
+        }
     }
 }

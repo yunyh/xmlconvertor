@@ -7,15 +7,15 @@ import javafx.stage.Stage
 
 class AppMain : Application() {
 
+    private val root: Parent by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        FXMLLoader.load(ResourceURL.MAIN_UI) as Parent
+    }
+
     override fun start(primaryStage: Stage?) {
-        when {
-            primaryStage != null -> with(primaryStage) {
-                val root: Parent? = FXMLLoader.load(ResourceURL.MAIN_UI)
-                val scene = Scene(root)
-                this.scene = scene
-                title = "Xml Converter"
-                show()
-            }
+        primaryStage?.run {
+            scene = Scene(root)
+            title = Properties.APP_TITLE
+            show()
         }
     }
 }

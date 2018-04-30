@@ -14,6 +14,7 @@ import java.io.File
 import java.net.URL
 import java.util.*
 import kotlin.system.exitProcess
+import Properties
 
 class MainUIController : Initializable, ParserExecutor.Callback {
 
@@ -37,35 +38,35 @@ class MainUIController : Initializable, ParserExecutor.Callback {
             println("Open Click")
             fileExplorer()
         }
+
         menuItemClose.setOnAction {
             exitProcess(100)
         }
-        executeButton.setOnAction {
-            when {
-                file != null -> {
-                    file?.let {
-                        executeGenerator(file!!)
-                    }
-                }
-            }
-        }
-        with(mainParent) {
-            setOnDragOver {
-                val board = it.dragboard
 
+        executeButton.setOnAction {
+            executeGenerator(when (file) {
+                null -> {
+                    mainLabel.text = "Open dimens.xml file first"
+                    return@setOnAction
+                }
+                else -> checkNotNull(file)
+            })
+        }
+
+        with(mainParent) {
+            setOnDragOver { event ->
+                val board = event.dragboard
                 when (board.hasFiles()) {
-                    true -> it.acceptTransferModes(TransferMode.COPY)
-                    false -> it.consume()
+                    true -> event.acceptTransferModes(TransferMode.COPY)
+                    false -> event.consume()
                 }
             }
-            setOnDragDropped {
-                when (it.dragboard.hasFiles()) {
-                    true -> {
-                        setDestinationFile(it.dragboard.files[0])
-                        it.isDropCompleted = true
-                    }
+            setOnDragDropped { event ->
+                if (event.dragboard.hasFiles()) {
+                    setDestinationFile(event.dragboard.files[0])
+                    event.isDropCompleted = true
                 }
-                it.consume()
+                event.consume()
             }
         }
     }
@@ -73,35 +74,36 @@ class MainUIController : Initializable, ParserExecutor.Callback {
     private fun setDestinationFile(file: File) {
         this.file = file
         lastPath = file.parentFile.path
-        val resourcePath = UsefulUtils.normalizeFilePath(file.path)
-        mainLabel.text = resourcePath
+        mainLabel.text = UsefulUtils.normalizeFilePath(file.path)
     }
 
     private fun fileExplorer() {
-        kotlin.run {
+        run {
             configureFileChooser(fileChooser)
-            val file = fileChooser.showOpenDialog(mainParent.scene.window)
-            file?.let {
-                setDestinationFile(file)
+            fileChooser.showOpenDialog(mainParent.scene.window)?.let {
+                setDestinationFile(it)
             }
         }
     }
 
     private fun configureFileChooser(fileChooser: FileChooser) {
-        fileChooser.title = "Open..."
-        when (lastPath) {
-            null -> fileChooser.initialDirectory = File(System.getProperty("user.home"))
-            else -> fileChooser.initialDirectory = File(lastPath)
+        with(fileChooser) {
+            title = "Open..."
+            initialDirectory = when (lastPath) {
+                null, "" -> File(System.getProperty(Properties.System.ROOT))
+                else -> File(lastPath)
+            }
+            Properties.System.XML_EXTENSION.let { extensionFilters.addAll(arrayOf(FileChooser.ExtensionFilter(it, "*.$it"))) }
         }
-        fileChooser.extensionFilters.addAll(arrayOf(FileChooser.ExtensionFilter("xml", "*.xml")))
     }
 
     private fun executeGenerator(f: File) {
         mainLabel.text = "Waiting..."
         executeButton.isDisable = true
-        val parserExecutor = ParserExecutor(f)
-        parserExecutor.setCallback(this)
-        parserExecutor.start()
+        ParserExecutor(f).apply {
+            setCallback(this@MainUIController)
+            start()
+        }
     }
 
     override fun onCreateFinish() {
@@ -109,5 +111,4 @@ class MainUIController : Initializable, ParserExecutor.Callback {
         mainLabel.text = "Finish !!"
         executeButton.isDisable = false
     }
-
 }

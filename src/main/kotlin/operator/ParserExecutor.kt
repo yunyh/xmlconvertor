@@ -13,10 +13,13 @@ import java.io.InputStream
 import java.util.concurrent.Executors
 import javax.xml.parsers.DocumentBuilderFactory
 
-class ParserExecutor(file: File) : Executor, MyOperator() {
-
-    private val PATTERN_DP: String = "dp"
-    private val PATTERN_PX: String = "px"
+class ParserExecutor(file: File) : Executor, MyOperator<File>() {
+    companion object {
+        private const val PATTERN_DP: String = "dp"
+        private const val PATTERN_PX: String = "px"
+        private const val ELEMENT_NAME_DIMEN = "dimen"
+        private const val ATTR_NAME_NAME = "name"
+    }
 
     private lateinit var inputStream: InputStream
     private lateinit var parentPath: String
@@ -32,66 +35,63 @@ class ParserExecutor(file: File) : Executor, MyOperator() {
         this.callback = callback
     }
 
-    override fun initialize(doing: Any) {
-        if (doing is File) {
-            inputStream = ByteArrayInputStream(doing.readBytes())
-            parentPath = doing.parentFile.parentFile.path
-        }
+    override fun initialize(doing: File) {
+        inputStream = ByteArrayInputStream(doing.readBytes())
+        parentPath = doing.parentFile.parentFile.path
     }
 
     override fun start() {
-
-        val service = Executors.newSingleThreadExecutor()
-        service.execute({
-            val doc = parserXML(inputStream)
-            doc?.let {
-                val nodeList = doc.getElementsByTagName("dimen")
-                (0..nodeList.length)
-                        .map { nodeList.item(it) }
-                        .forEach {
-                            it?.let {
-                                val element = it as Element
-                                val elementAttr = element.getAttribute("name")
-                                println("$elementAttr : ${it.firstChild.textContent}")
-                                parseArray.add(DimenDataModel(elementAttr, it.firstChild.textContent))
+        Executors.newSingleThreadExecutor().apply {
+            execute({
+                parserXML(inputStream)?.run {
+                    getElementsByTagName(ELEMENT_NAME_DIMEN).run {
+                        (0..length).map { item(it) }.forEach {
+                            when (it) {
+                                is Element -> with(it) {
+                                    getAttribute(ATTR_NAME_NAME).run {
+                                        println("$this : ${firstChild.textContent}")
+                                        parseArray.add(DimenDataModel(this, firstChild.textContent))
+                                    }
+                                }
+                                else -> return@forEach
                             }
                         }
-                buildXMLFile(doc.documentElement.nodeName)
-                return@execute
-            }
-            println("Error parser")
-        })
-        service.shutdown()
+                    }
+                    buildXMLFile(documentElement.nodeName)
+                    return@execute
+                }
+                println("Error parser")
+            })
+        }.shutdown()
     }
 
     override fun finish() {
         inputStream.close()
         Platform.runLater {
-            callback?.let {
-                callback!!.onCreateFinish()
+            callback?.run {
+                onCreateFinish()
             }
             println("Finish")
         }
     }
 
     private fun buildXMLFile(docNodeName: String) {
-        for (ratio in DimensRatio.values()) {
-            val export = ExportDimenXML(parentPath, ratio.pathName())
-            val rootElement = export.createRootElement(docNodeName)
-            for (model in parseArray) {
-                val nodeValueToConvert = calculatorToString(model.value, ratio.getRatio())
-                export.createChildNode(rootElement, "dimen", "name", model.name, nodeValueToConvert)
+        for (ratio: DimensRatio in DimensRatio.values()) {
+            ExportDimenXML(parentPath, ratio.pathName()).run {
+                createRootElement(docNodeName).let {
+                    for (model: DimenDataModel in parseArray) {
+                        createChildNode(it, ELEMENT_NAME_DIMEN, ATTR_NAME_NAME, model.name, calculatorToString(model.value, ratio.getRatio()))
+                    }
+                }
+                exportXMLFile()
             }
-            export.exportXMLFile()
         }
         finish()
     }
 
     private fun parserXML(inputStream: InputStream): Document? {
         try {
-            val instance = DocumentBuilderFactory.newInstance()
-            val objectBuilder = instance.newDocumentBuilder()
-            return objectBuilder.parse(inputStream)
+            return DocumentBuilderFactory.newInstance().newDocumentBuilder().run { parse(inputStream) }
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -103,8 +103,9 @@ class ParserExecutor(file: File) : Executor, MyOperator() {
             println("$objectString : contains px")
             return objectString
         }
-        val value = objectString.replace(PATTERN_DP, "").toFloat() * ratio
-        return (Math.round(value * 100.0) / 100.0).toString() + PATTERN_DP
+        return (objectString.replace(PATTERN_DP, "").toFloat() * ratio).run {
+            (Math.round(this * 100.0) / 100.0).toString() + PATTERN_DP
+        }
     }
 
     @FunctionalInterface

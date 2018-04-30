@@ -1,5 +1,5 @@
 package operator
 
-abstract class MyOperator {
-   abstract fun initialize(doing: Any)
+abstract class MyOperator<T : Any> {
+    abstract fun initialize(doing: T)
 }
