@@ -13,4 +13,9 @@ object Properties {
         const val YES = "yes"
         const val INDENT_VAULE: String = "4"
     }
+
+    object System {
+        const val ROOT = "user.home"
+        const val XML_EXTENSION = "xml"
+    }
 }
