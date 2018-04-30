@@ -26,8 +26,6 @@ class ExportDimenXML(private val parentPath: String, private val exportPath: Str
 
     fun createChildNode(rootElement: Element, elementName: String, attrName: String, attrValue: String, nodeValue: String) {
         document.createElement(elementName).run {
-            //            val attr = document.createAttribute(attrName).apply { value = attrValue }
-            //   attr.value = attrValue
             setAttributeNode(document.createAttribute(attrName).apply { value = attrValue })
             appendChild(document.createTextNode(nodeValue))
             rootElement.appendChild(this)

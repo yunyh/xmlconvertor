@@ -13,7 +13,7 @@ class AppMain : Application() {
 
     override fun start(primaryStage: Stage?) {
         primaryStage?.run {
-            this.scene = Scene(root)
+            scene = Scene(root)
             title = Properties.APP_TITLE
             show()
         }
