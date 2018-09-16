@@ -40,17 +40,15 @@ object ParserExecutor : Executor, MyOperator<File>() {
             execute {
                 parserXML(inputStream)?.run {
                     getElementsByTagName(ELEMENT_NAME_DIMEN).run {
-                        (0..length).map { item(it) }.forEach {
-                            when (it) {
-                                is Element -> with(it) {
-                                    getAttribute(ATTR_NAME_NAME).run {
-                                        println("$this : ${firstChild.textContent}")
-                                        parseArray.add(DimenDataModel(this, firstChild.textContent))
-                                    }
+                        (0..length).map { item(it) }.filterIsInstance<Element>().forEach {
+                            with(it) {
+                                getAttribute(ATTR_NAME_NAME).run {
+                                    println("$this : ${firstChild.textContent}")
+                                    parseArray.add(DimenDataModel(this, firstChild.textContent))
                                 }
-                                else -> return@forEach
                             }
                         }
+
                     }
                     buildXMLFile(documentElement.nodeName)
                     return@execute
@@ -91,7 +89,7 @@ object ParserExecutor : Executor, MyOperator<File>() {
                 objectString
             } else {
                 (objectString.replace(PATTERN_DP, "").toFloat() * ratio).run {
-                    (Math.round(this * 100.0) / 100.0).toString() + PATTERN_DP
+                    (Math.round(this * 100.0) / 100.0).toString().plus(PATTERN_DP)
                 }
             }
 
