@@ -1,6 +1,6 @@
 package controller
 
-import UsefulUtils
+import Properties
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.Parent
@@ -9,12 +9,12 @@ import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
 import javafx.scene.input.TransferMode
 import javafx.stage.FileChooser
+import normalizeFilePath
 import operator.ParserExecutor
 import java.io.File
 import java.net.URL
 import java.util.*
 import kotlin.system.exitProcess
-import Properties
 
 class MainUIController : Initializable, ParserExecutor.Callback {
 
@@ -29,9 +29,19 @@ class MainUIController : Initializable, ParserExecutor.Callback {
     @FXML
     private lateinit var executeButton: Button
 
-    private val fileChooser = FileChooser()
+    private val fileChooser: FileChooser by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        FileChooser().apply {
+            title = "Open..."
+            initialDirectory = File(System.getProperty((Properties.System.ROOT)))
+            Properties.System.XML_EXTENSION.let { extensionFilters.addAll(arrayOf(FileChooser.ExtensionFilter(it, "*.$it"))) }
+        }
+    }
     private var lastPath: String? = null
     private var file: File? = null
+
+    init {
+        ParserExecutor.setCallback(this@MainUIController)
+    }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         menuItemOpen.setOnAction {
@@ -44,29 +54,25 @@ class MainUIController : Initializable, ParserExecutor.Callback {
         }
 
         executeButton.setOnAction {
-            executeGenerator(when (file) {
-                null -> {
-                    mainLabel.text = "Open dimens.xml file first"
-                    return@setOnAction
-                }
-                else -> checkNotNull(file)
+            executeGenerator(checkNotNull(file) {
+                mainLabel.text = "Open ../dimens.xml file first"
+                return@setOnAction
             })
         }
 
         with(mainParent) {
-            setOnDragOver { event ->
-                val board = event.dragboard
-                when (board.hasFiles()) {
-                    true -> event.acceptTransferModes(TransferMode.COPY)
-                    false -> event.consume()
+            setOnDragOver { e ->
+                when (e.dragboard.hasFiles()) {
+                    true -> e.acceptTransferModes(TransferMode.COPY)
+                    false -> e.consume()
                 }
             }
-            setOnDragDropped { event ->
-                if (event.dragboard.hasFiles()) {
-                    setDestinationFile(event.dragboard.files[0])
-                    event.isDropCompleted = true
+            setOnDragDropped { e ->
+                if (e.dragboard.hasFiles()) {
+                    setDestinationFile(e.dragboard.files[0])
+                    e.isDropCompleted = true
                 }
-                event.consume()
+                e.consume()
             }
         }
     }
@@ -74,34 +80,26 @@ class MainUIController : Initializable, ParserExecutor.Callback {
     private fun setDestinationFile(file: File) {
         this.file = file
         lastPath = file.parentFile.path
-        mainLabel.text = UsefulUtils.normalizeFilePath(file.path)
+        mainLabel.text = file.path.normalizeFilePath()
     }
 
     private fun fileExplorer() {
-        run {
-            configureFileChooser(fileChooser)
-            fileChooser.showOpenDialog(mainParent.scene.window)?.let {
-                setDestinationFile(it)
+        fileChooser.run {
+            initialDirectory = if (lastPath.isNullOrEmpty()) {
+                File(System.getProperty((Properties.System.ROOT)))
+            } else {
+                File(lastPath)
             }
-        }
-    }
 
-    private fun configureFileChooser(fileChooser: FileChooser) {
-        with(fileChooser) {
-            title = "Open..."
-            initialDirectory = when (lastPath) {
-                null, "" -> File(System.getProperty(Properties.System.ROOT))
-                else -> File(lastPath)
-            }
-            Properties.System.XML_EXTENSION.let { extensionFilters.addAll(arrayOf(FileChooser.ExtensionFilter(it, "*.$it"))) }
+            setDestinationFile(checkNotNull(showOpenDialog(mainParent.scene.window)) { "File is empty" })
         }
     }
 
     private fun executeGenerator(f: File) {
         mainLabel.text = "Waiting..."
         executeButton.isDisable = true
-        ParserExecutor(f).apply {
-            setCallback(this@MainUIController)
+        ParserExecutor.apply {
+            initialize(f)
             start()
         }
     }

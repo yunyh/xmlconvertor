@@ -13,23 +13,18 @@ import java.io.InputStream
 import java.util.concurrent.Executors
 import javax.xml.parsers.DocumentBuilderFactory
 
-class ParserExecutor(file: File) : Executor, MyOperator<File>() {
-    companion object {
-        private const val PATTERN_DP: String = "dp"
-        private const val PATTERN_PX: String = "px"
-        private const val ELEMENT_NAME_DIMEN = "dimen"
-        private const val ATTR_NAME_NAME = "name"
-    }
+
+object ParserExecutor : Executor, MyOperator<File>() {
+    private const val PATTERN_DP: String = "dp"
+    private const val PATTERN_PX: String = "px"
+    private const val ELEMENT_NAME_DIMEN = "dimen"
+    private const val ATTR_NAME_NAME = "name"
 
     private lateinit var inputStream: InputStream
     private lateinit var parentPath: String
     private var callback: Callback? = null
 
     private val parseArray = ArrayList<DimenDataModel>()
-
-    init {
-        initialize(file)
-    }
 
     fun setCallback(callback: Callback) {
         this.callback = callback
@@ -42,7 +37,7 @@ class ParserExecutor(file: File) : Executor, MyOperator<File>() {
 
     override fun start() {
         Executors.newSingleThreadExecutor().apply {
-            execute({
+            execute {
                 parserXML(inputStream)?.run {
                     getElementsByTagName(ELEMENT_NAME_DIMEN).run {
                         (0..length).map { item(it) }.forEach {
@@ -61,16 +56,14 @@ class ParserExecutor(file: File) : Executor, MyOperator<File>() {
                     return@execute
                 }
                 println("Error parser")
-            })
+            }
         }.shutdown()
     }
 
     override fun finish() {
         inputStream.close()
         Platform.runLater {
-            callback?.run {
-                onCreateFinish()
-            }
+            callback?.onCreateFinish()
             println("Finish")
         }
     }
@@ -89,24 +82,19 @@ class ParserExecutor(file: File) : Executor, MyOperator<File>() {
         finish()
     }
 
-    private fun parserXML(inputStream: InputStream): Document? {
-        try {
-            return DocumentBuilderFactory.newInstance().newDocumentBuilder().run { parse(inputStream) }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        return null
-    }
+    @Throws(IOException::class)
+    private fun parserXML(inputStream: InputStream): Document? = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream)
 
-    private fun calculatorToString(objectString: String, ratio: Float): String {
-        if (objectString.contains(PATTERN_PX)) {
-            println("$objectString : contains px")
-            return objectString
-        }
-        return (objectString.replace(PATTERN_DP, "").toFloat() * ratio).run {
-            (Math.round(this * 100.0) / 100.0).toString() + PATTERN_DP
-        }
-    }
+    private fun calculatorToString(objectString: String, ratio: Float): String =
+            if (objectString.contains(PATTERN_PX)) {
+                println("$objectString : contains px")
+                objectString
+            } else {
+                (objectString.replace(PATTERN_DP, "").toFloat() * ratio).run {
+                    (Math.round(this * 100.0) / 100.0).toString() + PATTERN_DP
+                }
+            }
+
 
     @FunctionalInterface
     interface Callback {

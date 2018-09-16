@@ -6,7 +6,7 @@ object Properties {
     object XmlPropertyKeys {
         const val INDENT_AMOUNT = "{http://xml.apache.org/xslt}indent-amount"
         const val INDENT = OutputKeys.INDENT
-        const val OMIT_XML_DECLARATION = OutputKeys.OMIT_XML_DECLARATION;
+        const val OMIT_XML_DECLARATION = OutputKeys.OMIT_XML_DECLARATION
     }
 
     object XmlPropertyValue {
