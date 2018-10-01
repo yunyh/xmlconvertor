@@ -21,3 +21,5 @@ build/
 
 # Intellij
 out/
+
+*/META-INF/*
