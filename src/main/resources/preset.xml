@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!--
+ HDPI(2) {
+        override fun pathName(): String = "values-hdpi"
+        override fun getRatio(): Float = 320f / 360f
+        override fun displayRatio(): String = "${pathName()} : 320f / 360"
+    }-->
+<resources>
+    <group key="mdpi" path="values-mdpi">
+        <item name="width">320.0</item>
+        <item name="height">360.0</item>
+    </group>
+
+    <group key="hdpi" path="values-hdpi">
+        <item name="width">320.0</item>
+        <item name="height">360.0</item>
+    </group>
+
+</resources>

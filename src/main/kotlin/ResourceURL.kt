@@ -1,6 +1,7 @@
 import java.net.URL
 
 object ResourceURL {
-    // val GENERATOR = javaClass.getResource("generator.py")!!
     val MAIN_UI: URL = javaClass.getResource("main.fxml")!!
+    val SETTING_UI: URL = javaClass.getResource("settings.fxml")!!
+    val PRESET_XML: URL = javaClass.getResource("preset.xml")!!
 }

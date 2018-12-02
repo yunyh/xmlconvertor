@@ -1,9 +1,13 @@
-package operator
+package operator.parser
 
 import DimensRatio
 import `interface`.Executor
 import javafx.application.Platform
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import model.DimenDataModel
+import operator.MyOperator
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.ByteArrayInputStream
@@ -12,11 +16,16 @@ import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.Executors
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.coroutines.CoroutineContext
 
 
-object ParserExecutor : Executor, MyOperator<File>() {
-    private const val PATTERN_DP: String = "dp"
-    private const val PATTERN_PX: String = "px"
+object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
+    private val job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
+    private const val PATTERN_DP = "dp"
+    private const val PATTERN_PX = "px"
     private const val ELEMENT_NAME_DIMEN = "dimen"
     private const val ATTR_NAME_NAME = "name"
 
@@ -27,7 +36,7 @@ object ParserExecutor : Executor, MyOperator<File>() {
     private val parseArray = ArrayList<DimenDataModel>()
 
     fun setCallback(callback: Callback) {
-        this.callback = callback
+        ParserExecutor.callback = callback
     }
 
     override fun initialize(doing: File) {

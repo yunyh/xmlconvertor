@@ -18,6 +18,7 @@
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
             <!--<MenuItem mnemonicParsing="false" text="Delete"/>-->
+            <MenuItem fx:id="menuItemSetting" mnemonicParsing="false" text="Setting"/>
         </Menu>
         <Menu mnemonicParsing="false" text="Help">
             <MenuItem mnemonicParsing="false" text="About"/>

@@ -1,6 +1,10 @@
-package operator
+package operator.parser
 
-import Properties
+import INDENT
+import INDENT_AMOUNT
+import INDENT_VALUE
+import OMIT_XML_DECLARATION
+import YES
 import org.w3c.dom.Element
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
@@ -30,9 +34,9 @@ class ExportDimenXML(private val parentPath: String, private val exportPath: Str
 
     fun exportXMLFile() =
             with(transformer) {
-                setOutputProperty(Properties.XmlPropertyKeys.INDENT, Properties.XmlPropertyValue.YES)
-                setOutputProperty(Properties.XmlPropertyKeys.OMIT_XML_DECLARATION, Properties.XmlPropertyValue.YES)
-                setOutputProperty(Properties.XmlPropertyKeys.INDENT_AMOUNT, Properties.XmlPropertyValue.INDENT_VAULE)
+                setOutputProperty(INDENT, YES)
+                setOutputProperty(OMIT_XML_DECLARATION, YES)
+                setOutputProperty(INDENT_AMOUNT, INDENT_VALUE)
                 transform(DOMSource(document), with("$parentPath/$exportPath") {
                     File(this).mkdir()
                     StreamResult("$this/dimens.xml")
