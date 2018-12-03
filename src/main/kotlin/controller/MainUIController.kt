@@ -43,15 +43,8 @@ class MainUIController : Initializable, ParserExecutor.Callback {
             XML_EXTENSION.let { extensionFilters.addAll(arrayOf(FileChooser.ExtensionFilter(it, "*.$it"))) }
         }
     }
-    /*   private var lastPath: String? = null
-       private var file: File? = null*/
 
     private var selectFile: Pair<File?, String?> = Pair(null, null)
-
-    class SelectFileObject(map: Map<String, Any?>) {
-        val file: File by map
-        val path by map
-    }
 
     init {
         ParserExecutor.setCallback(this@MainUIController)

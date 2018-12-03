@@ -36,7 +36,7 @@ object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
     private val parseArray = ArrayList<DimenDataModel>()
 
     fun setCallback(callback: Callback) {
-        ParserExecutor.callback = callback
+        this@ParserExecutor.callback = callback
     }
 
     override fun initialize(doing: File) {
@@ -64,7 +64,8 @@ object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
                 }
                 println("Error parser")
             }
-        }.shutdown()
+            shutdown()
+        }
     }
 
     override fun finish() {
