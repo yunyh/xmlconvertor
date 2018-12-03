@@ -22,7 +22,7 @@ import kotlin.coroutines.CoroutineContext
 object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+        get() = Dispatchers.IO + job
 
     private const val PATTERN_DP = "dp"
     private const val PATTERN_PX = "px"
@@ -42,6 +42,7 @@ object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
     override fun initialize(doing: File) {
         inputStream = ByteArrayInputStream(doing.readBytes())
         parentPath = doing.parentFile.parentFile.path
+        parseArray.clear()
     }
 
     override fun start() {
@@ -60,6 +61,7 @@ object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
 
                     }
                     buildXMLFile(documentElement.nodeName)
+
                     return@execute
                 }
                 println("Error parser")
@@ -72,6 +74,7 @@ object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
         inputStream.close()
         Platform.runLater {
             callback?.onCreateFinish()
+            job.cancel()
             println("Finish")
         }
     }

@@ -25,14 +25,13 @@ class ExportDimenXML(private val parentPath: String, private val exportPath: Str
 
 
     fun createChildNode(rootElement: Element, elementName: String, attrName: String, attrValue: String, nodeValue: String) {
-        document.createElement(elementName).run {
+        rootElement.appendChild(document.createElement(elementName).apply {
             setAttributeNode(document.createAttribute(attrName).apply { value = attrValue })
             appendChild(document.createTextNode(nodeValue))
-            rootElement.appendChild(this)
-        }
+        })
     }
 
-    fun exportXMLFile() =
+    fun exportXMLFile(): Unit =
             with(transformer) {
                 setOutputProperty(INDENT, YES)
                 setOutputProperty(OMIT_XML_DECLARATION, YES)
