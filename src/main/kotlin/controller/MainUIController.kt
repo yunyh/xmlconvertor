@@ -68,7 +68,7 @@ class MainUIController : Initializable, ParserExecutor.Callback {
         }
 
         menuItemSetting.setOnAction {
-            val root = FXMLLoader.load(ResourceURL.SETTING_UI, resources) as Parent
+            val root: Parent = FXMLLoader.load(ResourceURL.SETTING_UI, resources)
             Stage().apply {
                 scene = Scene(root)
                 show()
@@ -122,7 +122,7 @@ class MainUIController : Initializable, ParserExecutor.Callback {
     }
 
     override fun onCreateFinish() {
-      //  file = null
+        //  file = null
         mainLabel.text = "Finish !!"
         executeButton.isDisable = false
     }
