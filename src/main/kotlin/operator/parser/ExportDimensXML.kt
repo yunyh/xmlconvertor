@@ -23,7 +23,6 @@ class ExportDimensXML(private val parentPath: String, private val exportPath: St
         document.appendChild(this)
     }
 
-
     fun createChildNode(rootElement: Element, elementName: String, attrName: String, attrValue: String, nodeValue: String) {
         rootElement.appendChild(document.createElement(elementName).apply {
             setAttributeNode(document.createAttribute(attrName).apply { value = attrValue })
