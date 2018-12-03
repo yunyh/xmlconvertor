@@ -81,7 +81,7 @@ object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
 
     private fun buildXMLFile(docNodeName: String) {
         for (ratio: DimensRatio in DimensRatio.values()) {
-            ExportDimenXML(parentPath, ratio.pathName()).run {
+            ExportDimensXML(parentPath, ratio.pathName()).run {
                 createRootElement(docNodeName).let {
                     for (model: DimenDataModel in parseArray) {
                         createChildNode(it, ELEMENT_NAME_DIMEN, ATTR_NAME_NAME, model.name, calculatorToString(model.value, ratio.getRatio()))

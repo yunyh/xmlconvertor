@@ -12,7 +12,7 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
-class ExportDimenXML(private val parentPath: String, private val exportPath: String) {
+class ExportDimensXML(private val parentPath: String, private val exportPath: String) {
     private val document by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         docBuilder.newDocument()
     }
