@@ -4,6 +4,7 @@ import DimensRatio
 import `interface`.Executor
 import javafx.application.Platform
 import kotlinx.coroutines.*
+import kotlinx.coroutines.javafx.JavaFx
 import model.DimenDataModel
 import operator.MyOperator
 import operator.XMLFileGenerator
@@ -84,13 +85,11 @@ object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
 
     override fun finish() {
         inputStream.close()
-        Platform.runLater {
-            callback?.onCreateFinish()
-            if (::job.isInitialized) {
-                job.complete()
-            }
-            println("Finish")
+        callback?.onCreateFinish()
+        if (::job.isInitialized) {
+            job.complete()
         }
+        println("Finish")
     }
 
     private fun buildXMLFile(docNodeName: String, parseArray: List<DimenDataModel>) {

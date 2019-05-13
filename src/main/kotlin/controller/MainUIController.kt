@@ -14,14 +14,21 @@ import javafx.scene.control.MenuItem
 import javafx.scene.input.TransferMode
 import javafx.stage.FileChooser
 import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import normalizeFilePath
 import operator.parser.ParserExecutor
 import java.io.File
 import java.net.URL
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
 
-class MainUIController : Initializable, ParserExecutor.Callback {
+class MainUIController : Initializable, ParserExecutor.Callback, CoroutineScope {
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.JavaFx
 
     @FXML
     private lateinit var mainParent: Parent
@@ -123,7 +130,9 @@ class MainUIController : Initializable, ParserExecutor.Callback {
 
     override fun onCreateFinish() {
         //  file = null
-        mainLabel.text = "Finish !!"
-        executeButton.isDisable = false
+        launch {
+            mainLabel.text = "Finish !!"
+            executeButton.isDisable = false
+        }
     }
 }

@@ -15,6 +15,7 @@ repositories {
 dependencies {
     compile(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.2.1")
 }
 
 tasks.withType<KotlinCompile> {

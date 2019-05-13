@@ -19,9 +19,3 @@ class PresetOperator : MyOperator<File>() {
     private fun parserXML(inputStream: InputStream): Document? = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream)
 
 }
-
-object PresetManager {
-    init {
-        PresetOperator().initialize(File(ResourceURL.PRESET_XML.toURI()))
-    }
-}

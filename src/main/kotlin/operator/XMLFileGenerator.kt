@@ -12,16 +12,13 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-object XMLFileGenerator : CoroutineScope {
+object XMLFileGenerator {
 
     private const val PATTERN_DP = "dp"
     private const val PATTERN_PX = "px"
     private const val ELEMENT_NAME_DIMEN = "dimen"
     private const val ATTR_NAME_NAME = "name"
 
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
 
     suspend fun fileGeneratorAsync(fileParentPath: String,
                                    docNodeName: String,
@@ -35,7 +32,7 @@ object XMLFileGenerator : CoroutineScope {
                 }
                 try {
                     exportXMLFile()
-                  //  it.resume(ResultType(true))
+                    //  it.resume(ResultType(true))
                 } catch (e: IOException) {
                     it.resumeWithException(e)
                     return@suspendCoroutine
