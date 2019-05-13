@@ -7,6 +7,7 @@ import OMIT_XML_DECLARATION
 import YES
 import org.w3c.dom.Element
 import java.io.File
+import java.io.IOException
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
@@ -19,6 +20,7 @@ class ExportDimensXML(private val parentPath: String, private val exportPath: St
     private val docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
     private val transformer = TransformerFactory.newInstance().newTransformer()
 
+
     fun createRootElement(tagName: String): Element = document.createElement(tagName).apply {
         document.appendChild(this)
     }
@@ -30,6 +32,7 @@ class ExportDimensXML(private val parentPath: String, private val exportPath: St
         })
     }
 
+    @Throws(IOException::class)
     fun exportXMLFile(): Unit =
             with(transformer) {
                 setOutputProperty(INDENT, YES)

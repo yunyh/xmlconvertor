@@ -3,26 +3,24 @@ package operator.parser
 import DimensRatio
 import `interface`.Executor
 import javafx.application.Platform
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import model.DimenDataModel
 import operator.MyOperator
+import operator.XMLFileGenerator
 import org.w3c.dom.Document
 import org.w3c.dom.Element
+import org.w3c.dom.NodeList
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import java.util.concurrent.Executors
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.coroutines.CoroutineContext
 
 
 object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
-    private val job = Job()
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
+        get() = Dispatchers.IO
 
     private const val PATTERN_DP = "dp"
     private const val PATTERN_PX = "px"
@@ -33,7 +31,9 @@ object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
     private lateinit var parentPath: String
     private var callback: Callback? = null
 
-    private val parseArray = ArrayList<DimenDataModel>()
+    // private val parseArray = ArrayList<DimenDataModel>()
+
+    private lateinit var job: CompletableJob
 
     fun setCallback(callback: Callback) {
         this@ParserExecutor.callback = callback
@@ -42,44 +42,58 @@ object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
     override fun initialize(doing: File) {
         inputStream = ByteArrayInputStream(doing.readBytes())
         parentPath = doing.parentFile.parentFile.path
-        parseArray.clear()
+        //     parseArray.clear()
+    }
+
+
+    //@Throws(IOException::class)
+    private val parserXML: (inputStream: InputStream) -> Document? = {
+        try {
+            DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream)
+        } catch (e: IOException) {
+            null
+        }
     }
 
     override fun start() {
-        Executors.newSingleThreadExecutor().apply {
-            execute {
-                parserXML(inputStream)?.run {
-                    getElementsByTagName(ELEMENT_NAME_DIMEN).run {
-                        (0..length).map { item(it) }.filterIsInstance<Element>().forEach {
-                            with(it) {
-                                getAttribute(ATTR_NAME_NAME).run {
-                                    println("$this : ${firstChild.textContent}")
-                                    parseArray.add(DimenDataModel(this, firstChild.textContent))
-                                }
+        job = Job().apply { coroutineContext + this }
+        launch {
+            parserXML(inputStream)?.run {
+                getElementsByTagName(ELEMENT_NAME_DIMEN).run convert@{
+                    filterElement().map {
+                        with(it) {
+                            getAttribute(ATTR_NAME_NAME).run {
+                                println("$this : ${firstChild.textContent}")
+                                DimenDataModel(this, firstChild.textContent)
                             }
                         }
-
                     }
-                    buildXMLFile(documentElement.nodeName)
-
-                    return@execute
+                }.run list@{
+                    XMLFileGenerator.fileGeneratorAsync(parentPath, documentElement.nodeName, this@list)
                 }
-                println("Error parser")
+            }?.apply {
+                when (isSuccess) {
+                    true -> finish()
+                    else -> println("Error parser")
+                }
             }
-            shutdown()
         }
     }
+
+    private fun NodeList.filterElement(): List<Element> = (0..length).map { item(it) }.filterIsInstance<Element>()
 
     override fun finish() {
         inputStream.close()
         Platform.runLater {
             callback?.onCreateFinish()
-            job.cancel()
+            if (::job.isInitialized) {
+                job.complete()
+            }
             println("Finish")
         }
     }
 
-    private fun buildXMLFile(docNodeName: String) {
+    private fun buildXMLFile(docNodeName: String, parseArray: List<DimenDataModel>) {
         for (ratio: DimensRatio in DimensRatio.values()) {
             ExportDimensXML(parentPath, ratio.pathName()).run {
                 createRootElement(docNodeName).let {
@@ -92,9 +106,6 @@ object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
         }
         finish()
     }
-
-    @Throws(IOException::class)
-    private fun parserXML(inputStream: InputStream): Document? = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream)
 
     private fun calculatorToString(objectString: String, ratio: Float): String =
             if (objectString.contains(PATTERN_PX)) {
