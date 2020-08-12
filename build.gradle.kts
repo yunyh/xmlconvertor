@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.3.31"
+    id("org.openjfx.javafxplugin") version "0.0.9"
 }
 
 group = "my"
@@ -20,4 +21,10 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+javafx {
+    version = "12"
+    modules("javafx.controls", "javafx.fxml")
+    configuration = "compileOnly"
 }
