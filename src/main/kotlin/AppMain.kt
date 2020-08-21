@@ -7,7 +7,7 @@ import javafx.stage.Stage
 class AppMain : Application() {
 
     private val root: Parent by lazy {
-        FXMLLoader.load<Parent>(ResourceURL.MAIN_UI)
+        FXMLLoader.load(ResourceURL.MAIN_UI)
     }
 
     override fun start(primaryStage: Stage?) {

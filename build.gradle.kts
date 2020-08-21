@@ -1,30 +1,40 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-plugins {
-    kotlin("jvm") version "1.3.31"
-    id("org.openjfx.javafxplugin") version "0.0.9"
-}
-
 group = "my"
-version = "1.0.1"
+version = "1.0.2"
+
+plugins {
+    val kotlinVersion = "1.4.0"
+    val openjfxVersion = "0.0.9"
+
+    kotlin("jvm") version kotlinVersion
+    id("org.openjfx.javafxplugin") version openjfxVersion
+
+
+}
 
 repositories {
     mavenCentral()
     jcenter()
+
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.2.1")
-}
 
+    val coroutineVersion = "1.3.9"
+
+    implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:$coroutineVersion")
+}
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 javafx {
-    version = "12"
+    version = "14"
     modules("javafx.controls", "javafx.fxml")
     configuration = "compileOnly"
 }
