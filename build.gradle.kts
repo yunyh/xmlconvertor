@@ -4,7 +4,7 @@ group = "my"
 version = "1.0.2"
 
 plugins {
-    val kotlinVersion = "1.4.0"
+    val kotlinVersion = "1.4.10"
     val openjfxVersion = "0.0.9"
 
     kotlin("jvm") version kotlinVersion
@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    val coroutineVersion = "1.3.9"
+    val coroutineVersion = "1.4.1"
 
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
