@@ -117,8 +117,7 @@ object ParserExecutor : Executor, MyOperator<File>(), CoroutineScope {
             }
 
 
-    @FunctionalInterface
-    interface Callback {
+    fun interface Callback {
         fun onCreateFinish()
     }
 }
