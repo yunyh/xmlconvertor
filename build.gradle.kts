@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    val coroutineVersion = "1.4.1"
+    val coroutineVersion = "1.5.1"
 
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
@@ -25,7 +25,7 @@ dependencies {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 javafx {
