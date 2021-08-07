@@ -1,38 +1,43 @@
-package operator
+package operator.parser
 
-import Properties
+import INDENT
+import INDENT_AMOUNT
+import INDENT_VALUE
+import OMIT_XML_DECLARATION
+import YES
 import org.w3c.dom.Element
 import java.io.File
+import java.io.IOException
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
-class ExportDimenXML(private val parentPath: String, private val exportPath: String) {
+class ExportDimensXML(private val parentPath: String, private val exportPath: String) {
     private val document by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         docBuilder.newDocument()
     }
     private val docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
     private val transformer = TransformerFactory.newInstance().newTransformer()
 
+
     fun createRootElement(tagName: String): Element = document.createElement(tagName).apply {
         document.appendChild(this)
     }
 
-
     fun createChildNode(rootElement: Element, elementName: String, attrName: String, attrValue: String, nodeValue: String) {
-        document.createElement(elementName).run {
+        rootElement.appendChild(document.createElement(elementName).apply {
             setAttributeNode(document.createAttribute(attrName).apply { value = attrValue })
             appendChild(document.createTextNode(nodeValue))
-            rootElement.appendChild(this)
-        }
+        })
     }
 
-    fun exportXMLFile() =
+    @Throws(IOException::class)
+    fun exportXMLFile(): Unit =
             with(transformer) {
-                setOutputProperty(Properties.XmlPropertyKeys.INDENT, Properties.XmlPropertyValue.YES)
-                setOutputProperty(Properties.XmlPropertyKeys.OMIT_XML_DECLARATION, Properties.XmlPropertyValue.YES)
-                setOutputProperty(Properties.XmlPropertyKeys.INDENT_AMOUNT, Properties.XmlPropertyValue.INDENT_VAULE)
+                setOutputProperty(INDENT, YES)
+                setOutputProperty(OMIT_XML_DECLARATION, YES)
+                setOutputProperty(INDENT_AMOUNT, INDENT_VALUE)
                 transform(DOMSource(document), with("$parentPath/$exportPath") {
                     File(this).mkdir()
                     StreamResult("$this/dimens.xml")

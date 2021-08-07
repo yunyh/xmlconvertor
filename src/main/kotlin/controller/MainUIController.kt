@@ -1,22 +1,34 @@
 package controller
 
-import Properties
+import ROOT
+import ResourceURL
+import XML_EXTENSION
 import javafx.fxml.FXML
+import javafx.fxml.FXMLLoader
 import javafx.fxml.Initializable
 import javafx.scene.Parent
+import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
 import javafx.scene.input.TransferMode
 import javafx.stage.FileChooser
+import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import normalizeFilePath
-import operator.ParserExecutor
+import operator.parser.ParserExecutor
 import java.io.File
 import java.net.URL
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
 
-class MainUIController : Initializable, ParserExecutor.Callback {
+class MainUIController : Initializable, ParserExecutor.Callback, CoroutineScope {
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.JavaFx
 
     @FXML
     private lateinit var mainParent: Parent
@@ -28,16 +40,18 @@ class MainUIController : Initializable, ParserExecutor.Callback {
     private lateinit var mainLabel: Label
     @FXML
     private lateinit var executeButton: Button
+    @FXML
+    private lateinit var menuItemSetting: MenuItem
 
     private val fileChooser: FileChooser by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         FileChooser().apply {
             title = "Open..."
-            initialDirectory = File(System.getProperty((Properties.System.ROOT)))
-            Properties.System.XML_EXTENSION.let { extensionFilters.addAll(arrayOf(FileChooser.ExtensionFilter(it, "*.$it"))) }
+            initialDirectory = File(System.getProperty(ROOT))
+            XML_EXTENSION.let { extensionFilters.addAll(arrayOf(FileChooser.ExtensionFilter(it, "*.$it"))) }
         }
     }
-    private var lastPath: String? = null
-    private var file: File? = null
+
+    private var selectFile: Pair<File?, String?> = Pair(null, null)
 
     init {
         ParserExecutor.setCallback(this@MainUIController)
@@ -54,10 +68,18 @@ class MainUIController : Initializable, ParserExecutor.Callback {
         }
 
         executeButton.setOnAction {
-            executeGenerator(checkNotNull(file) {
+            executeGenerator(checkNotNull(selectFile.first) {
                 mainLabel.text = "Open ../dimens.xml file first"
                 return@setOnAction
             })
+        }
+
+        menuItemSetting.setOnAction {
+            val root: Parent = FXMLLoader.load(ResourceURL.SETTING_UI, resources)
+            Stage().apply {
+                scene = Scene(root)
+                show()
+            }
         }
 
         with(mainParent) {
@@ -77,21 +99,23 @@ class MainUIController : Initializable, ParserExecutor.Callback {
         }
     }
 
-    private fun setDestinationFile(file: File) {
-        this.file = file
-        lastPath = file.parentFile.path
-        mainLabel.text = file.path.normalizeFilePath()
+    private fun setDestinationFile(file: File?) {
+        file?.let {
+            selectFile = Pair(file, file.parentFile.path)
+            //lastPath = file.parentFile.path
+            mainLabel.text = file.path.normalizeFilePath()
+        }
     }
 
     private fun fileExplorer() {
         fileChooser.run {
-            initialDirectory = if (lastPath.isNullOrEmpty()) {
-                File(System.getProperty((Properties.System.ROOT)))
+            initialDirectory = if (selectFile.second.isNullOrEmpty()) {
+                File(System.getProperty(ROOT))
             } else {
-                File(lastPath)
+                File(selectFile.second)
             }
 
-            setDestinationFile(checkNotNull(showOpenDialog(mainParent.scene.window)) { "File is empty" })
+            setDestinationFile(showOpenDialog(mainParent.scene.window))
         }
     }
 
@@ -105,8 +129,10 @@ class MainUIController : Initializable, ParserExecutor.Callback {
     }
 
     override fun onCreateFinish() {
-        file = null
-        mainLabel.text = "Finish !!"
-        executeButton.isDisable = false
+        //  file = null
+        launch {
+            mainLabel.text = "Finish !!"
+            executeButton.isDisable = false
+        }
     }
 }
